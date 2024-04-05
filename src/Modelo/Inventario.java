@@ -12,7 +12,6 @@ import java.sql.SQLException;
  */
 public class Inventario {
     
-    
     public int agregaDatosProducto(String marca, String modelo, String pantalla, String camara, String almacenamiento, String ram) {
         int folio = 0;
         String sql = "INSERT INTO producto (marca, modelo, pantalla, camara, almacenamiento, ram) VALUES (?, ?, ?, ?, ?, ?)";
@@ -61,24 +60,32 @@ public class Inventario {
         return bandera;
     }
     
-    public boolean buscaProducto(int folio){
-        boolean bandera = false;
-        String sql = "SELECT COUNT(*) AS cantidad FROM producto WHERE id = ?;";
+    public Producto buscaProducto(int folio){
+        
+        Producto producto = null;
+        String sql = "SELECT p.id, p.marca, p.modelo, p.pantalla, p.camara, p.almacenamiento, p.ram, i.stock, i.precio "
+                + "FROM Producto p JOIN Inventario i ON p.id = i.id_Producto WHERE p.id = ?;";
         try ( Connection conn = ConexionDB.conectar();  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, folio);
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                if (rs.getInt("cantidad") > 0){
-                    bandera = true;
-                }
+                producto = new Producto(rs.getInt("id"),
+                        rs.getString("marca"),
+                        rs.getString("modelo"),
+                        rs.getString("pantalla"),
+                        rs.getString("almacenamiento"),
+                        rs.getString("camara"),
+                        rs.getString("ram"),
+                        rs.getInt("stock"), 
+                        rs.getDouble("precio"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
 
         }
-        return bandera;
+        return producto;
     }
     
     public boolean eliminaProducto(int folio){

@@ -15,7 +15,7 @@ public class Main {
         
         
         //Inventario inventario = new Inventario();
-        //System.out.println(inventario.buscaProducto(1));
+        //System.out.println(inventario.buscaProducto(15));
         //System.out.println(inventario.eliminaProducto(0));
         
         //int folio = inventario.agregaDatosProducto("Samsung", "Galaxy S23 Ultra ", "6.8", "200 MP","512 GB", "12GB");

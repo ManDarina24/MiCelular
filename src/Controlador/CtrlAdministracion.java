@@ -16,7 +16,6 @@ public class CtrlAdministracion implements ActionListener{
     private final Administracion modeloAdmin = new Administracion();
     private final Login vistaLogin = new Login();
     private final MenuPrincipal vistaMenu = new MenuPrincipal();
-    private final MenuInventario vistaInv = new MenuInventario();
     
     CtrlAdministracion() {
         this.vistaLogin.btnIngresar.addActionListener(this);
