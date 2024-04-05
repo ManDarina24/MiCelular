@@ -14,6 +14,7 @@ public class CtrlInventario implements ActionListener {
     private final MenuInventario vistaInv = new MenuInventario();
     private final AgregaProducto vistaAgregar = new AgregaProducto();
     private final ModificaProductos vistaModificar = new ModificaProductos();
+    private final EliminaProducto vistaElimina = new EliminaProducto();
     private final Inventario modeloInventario = new Inventario();
     
     public CtrlInventario(){
@@ -22,6 +23,9 @@ public class CtrlInventario implements ActionListener {
         this.vistaInv.btnModificar.addActionListener(this);
         this.vistaModificar.btnBuscar.addActionListener(this);
         this.vistaModificar.btnModificaInventario.addActionListener(this);
+        this.vistaInv.btnEliminar.addActionListener(this);
+        this.vistaElimina.btnBuscar.addActionListener(this);
+        this.vistaElimina.btnEliminaInventario.addActionListener(this);
     }
     
     public void iniciar() {
@@ -32,7 +36,7 @@ public class CtrlInventario implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        //e.getSource() == vistaLogin.btnIngresar
+        //Vista Inventario
         if (e.getSource() == vistaInv.btnAgregar){
             vistaInv.setVisible(false);
             vistaAgregar.setVisible(true);
@@ -46,26 +50,78 @@ public class CtrlInventario implements ActionListener {
             vistaModificar.setTitle("Modificar productos");
             vistaModificar.setLocationRelativeTo(null);
         }
+        //
+        if (e.getSource() == vistaInv.btnEliminar){
+            vistaInv.setVisible(false);
+            vistaElimina.setVisible(true);
+            vistaElimina.setTitle("Elimina productos");
+            vistaElimina.setLocationRelativeTo(null);
+        }
         
-        if (e.getSource() == vistaModificar.btnBuscar){
+        if (e.getSource() == vistaElimina.btnBuscar) {
+            String strFolio = vistaElimina.getFolioTxt().getText();
+            if (!strFolio.isEmpty() && strFolio.matches("-?\\d+(\\.\\d+)?")) {
+                int folio = Integer.parseInt(vistaElimina.getFolioTxt().getText());
+
+                if (modeloInventario.buscaProducto(folio) != null) {
+                    //El inventario nos regresa un Producto, entonces eso lo asignamos a las casillas para que el 
+                    //usuario pueda observar el producto
+                    Producto producto = modeloInventario.buscaProducto(folio);
+
+                    vistaElimina.getMarcaLbl().setText("Marca: " + producto.getMarca());
+                    vistaElimina.getModeloLbl().setText("Modelo: " + producto.getModelo());
+                    vistaElimina.getPantallaLbl().setText("Pantalla: " + producto.getPantalla());
+                    vistaElimina.getAlmLbl().setText("Almacenamiento: " + producto.getAlmacenamiento());
+                    vistaElimina.getCamaraLbl().setText("Camara: " + producto.getCamara());
+                    vistaElimina.getRamLbl().setText("Ram: " + producto.getRam());
+                    vistaElimina.getStockLbl().setText("Cantidad disponible: " + String.valueOf(producto.getStock()));
+                    vistaElimina.getPrecioLbl().setText("Precio: " + String.valueOf(producto.getPrecio()));
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Producto no encontrado, intentelo de nuevo");
+                    limpiarVistaEliminar();
+                }
+            } 
+        }
+        
+        if (e.getSource() == vistaElimina.btnEliminaInventario){
+            String StrFolio = vistaElimina.getFolioTxt().getText();
+            if (!StrFolio.isEmpty() && StrFolio.matches("-?\\d+(\\.\\d+)?") ){
+                int folio = Integer.parseInt(vistaElimina.getFolioTxt().getText());
+                if(modeloInventario.eliminaProducto(folio)){
+                    JOptionPane.showMessageDialog(null, "El producto ha sido eliminado del inventario");
+                    limpiarVistaEliminar();
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Para eliminar un producto, primero busca uno");
+            }
             
-            int folio = Integer.parseInt(vistaModificar.getFolioTxt().getText());
-            if (modeloInventario.buscaProducto(folio) != null){
-                //El inventario nos regresa in Producto, entonces eso lo asignamos a las casillas para que el 
-                //usuario pueda modificarlo despues 
-                Producto producto = modeloInventario.buscaProducto(folio);
-                vistaModificar.getMarcaTxt().setText(producto.getMarca());
-                vistaModificar.getModeloTxt().setText(producto.getModelo());
-                vistaModificar.getPantallaTxt().setText(producto.getPantalla());
-                vistaModificar.getAlmTxt().setText(producto.getAlmacenamiento());
-                vistaModificar.getCamaraTxt().setText(producto.getCamara());
-                vistaModificar.getRamTxt().setText(producto.getRam());
-                vistaModificar.getStockTxt().setValue(producto.getStock());
-                vistaModificar.getPrecioTxt().setText(String.valueOf(producto.getPrecio()));
-            } else{
-                JOptionPane.showMessageDialog(null, "Producto no encontrado, intentelo de nuevo");
-                limpiarVistaModificar();
-            }   
+        }
+        
+        
+        if (e.getSource() == vistaModificar.btnBuscar) {
+
+            String strFolio = vistaModificar.getFolioTxt().getText();
+            if (!strFolio.isEmpty() && strFolio.matches("-?\\d+(\\.\\d+)?")) {
+                int folio = Integer.parseInt(vistaModificar.getFolioTxt().getText());
+                
+                if (modeloInventario.buscaProducto(folio) != null) {
+                    //El inventario nos regresa in Producto, entonces eso lo asignamos a las casillas para que el 
+                    //usuario pueda modificarlo despues 
+                    Producto producto = modeloInventario.buscaProducto(folio);
+                    vistaModificar.getMarcaTxt().setText(producto.getMarca());
+                    vistaModificar.getModeloTxt().setText(producto.getModelo());
+                    vistaModificar.getPantallaTxt().setText(producto.getPantalla());
+                    vistaModificar.getAlmTxt().setText(producto.getAlmacenamiento());
+                    vistaModificar.getCamaraTxt().setText(producto.getCamara());
+                    vistaModificar.getRamTxt().setText(producto.getRam());
+                    vistaModificar.getStockTxt().setValue(producto.getStock());
+                    vistaModificar.getPrecioTxt().setText(String.valueOf(producto.getPrecio()));
+                } else {
+                    JOptionPane.showMessageDialog(null, "Producto no encontrado, intentelo de nuevo");
+                    limpiarVistaModificar();
+                }
+            }
         }
         
         if (e.getSource() == vistaModificar.btnModificaInventario) {
@@ -236,6 +292,17 @@ public class CtrlInventario implements ActionListener {
         vistaModificar.getPrecioTxt().setText("");
         vistaModificar.getStockTxt().setValue(0);
     }
-
     
+    private void limpiarVistaEliminar() {
+        vistaElimina.getFolioTxt().setText("");
+        vistaElimina.getMarcaLbl().setText("Marca:");
+        vistaElimina.getModeloLbl().setText("Modelo:");
+        vistaElimina.getPantallaLbl().setText("Pantalla:");
+        vistaElimina.getAlmLbl().setText("Almacenamiento:");
+        vistaElimina.getCamaraLbl().setText("Camara:");
+        vistaElimina.getRamLbl().setText("Ram:");
+        vistaElimina.getStockLbl().setText("Cantidad disponible:");
+        vistaElimina.getPrecioLbl().setText("Precio:");
+    }
+
 }
