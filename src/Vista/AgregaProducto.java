@@ -46,6 +46,7 @@ public class AgregaProducto extends javax.swing.JFrame {
         precioTxt = new javax.swing.JTextField();
         stockTxt = new javax.swing.JSpinner();
         btnAgregaInventario = new javax.swing.JButton();
+        btnRegresar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -96,14 +97,18 @@ public class AgregaProducto extends javax.swing.JFrame {
         btnAgregaInventario.setForeground(new java.awt.Color(255, 255, 255));
         btnAgregaInventario.setText("Agregar");
 
+        btnRegresar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/flecha.png"))); // NOI18N
+        btnRegresar.setBorder(null);
+        btnRegresar.setBorderPainted(false);
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(33, 33, 33)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(33, 33, 33)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel3)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
@@ -141,7 +146,8 @@ public class AgregaProducto extends javax.swing.JFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(almTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(203, 203, 203)
+                        .addComponent(btnRegresar)
+                        .addGap(146, 146, 146)
                         .addComponent(jLabel2)))
                 .addContainerGap(42, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
@@ -153,7 +159,9 @@ public class AgregaProducto extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(18, 18, 18)
-                .addComponent(jLabel2)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addComponent(btnRegresar))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3)
                 .addGap(26, 26, 26)
@@ -256,6 +264,7 @@ public class AgregaProducto extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField almTxt;
     public javax.swing.JButton btnAgregaInventario;
+    public javax.swing.JButton btnRegresar;
     private javax.swing.JTextField camaraTxt;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
