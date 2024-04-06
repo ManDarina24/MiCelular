@@ -4,20 +4,26 @@ import Modelo.*;
 import Vista.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author darina
  */
 public class CtrlInventario implements ActionListener {
+
     private final MenuInventario vistaInv = new MenuInventario();
     private final AgregaProducto vistaAgregar = new AgregaProducto();
     private final ModificaProductos vistaModificar = new ModificaProductos();
     private final EliminaProducto vistaElimina = new EliminaProducto();
     private final Inventario modeloInventario = new Inventario();
-    
-    public CtrlInventario(){
+    private final Catalogo vistaCatalogo = new Catalogo();
+    private final CtrlAdministracion  admin = new CtrlAdministracion();
+
+    public CtrlInventario() {
         this.vistaInv.btnAgregar.addActionListener(this);
         this.vistaAgregar.btnAgregaInventario.addActionListener(this);
         this.vistaInv.btnModificar.addActionListener(this);
@@ -26,38 +32,73 @@ public class CtrlInventario implements ActionListener {
         this.vistaInv.btnEliminar.addActionListener(this);
         this.vistaElimina.btnBuscar.addActionListener(this);
         this.vistaElimina.btnEliminaInventario.addActionListener(this);
+        this.vistaInv.btnVerProductos.addActionListener(this);
+        this.vistaInv.btnRegresar.addActionListener(this);
+        this.vistaModificar.btnRegresar.addActionListener(this);
+        this.vistaElimina.btnRegresar.addActionListener(this);
+        this.vistaAgregar.btnRegresar.addActionListener(this);
+        this.vistaCatalogo.btnRegresar.addActionListener(this);
     }
-    
+
     public void iniciar() {
         vistaInv.setVisible(true);
         vistaInv.setTitle("Menu inventario");
         vistaInv.setLocationRelativeTo(null);
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         //Vista Inventario
-        if (e.getSource() == vistaInv.btnAgregar){
+        if (e.getSource() == vistaInv.btnRegresar){
+            vistaInv.setVisible(false);
+            admin.mostrarMenuPrincipal();
+        }
+        if (e.getSource() == vistaElimina.btnRegresar){
+            vistaElimina.setVisible(false);
+            iniciar();
+        }
+        if (e.getSource() == vistaModificar.btnRegresar ){
+            vistaModificar.setVisible(false);
+            iniciar();
+        }
+        if (e.getSource() == vistaAgregar.btnRegresar ){
+            vistaAgregar.setVisible(false);
+            iniciar();
+        }
+        if (e.getSource() == vistaCatalogo.btnRegresar ){
+            vistaCatalogo.setVisible(false);
+            iniciar();
+        }
+        
+        if (e.getSource() == vistaInv.btnAgregar) {
             vistaInv.setVisible(false);
             vistaAgregar.setVisible(true);
             vistaAgregar.setTitle("Agregar producto");
             vistaAgregar.setLocationRelativeTo(null);
         }
-        
-        if (e.getSource() == vistaInv.btnModificar){
+
+        if (e.getSource() == vistaInv.btnModificar) {
             vistaInv.setVisible(false);
             vistaModificar.setVisible(true);
             vistaModificar.setTitle("Modificar productos");
             vistaModificar.setLocationRelativeTo(null);
         }
         //
-        if (e.getSource() == vistaInv.btnEliminar){
+        if (e.getSource() == vistaInv.btnEliminar) {
             vistaInv.setVisible(false);
             vistaElimina.setVisible(true);
             vistaElimina.setTitle("Elimina productos");
             vistaElimina.setLocationRelativeTo(null);
         }
-        
+
+        if (e.getSource() == vistaInv.btnVerProductos) {
+            vistaInv.setVisible(false);
+            vistaCatalogo.setVisible(true);
+            vistaCatalogo.setTitle("Catalogo");
+            vistaCatalogo.setLocationRelativeTo(null);
+            vistaCatalogo.tabla.setModel(listar(vistaCatalogo.tabla));
+        }
+
         if (e.getSource() == vistaElimina.btnBuscar) {
             String strFolio = vistaElimina.getFolioTxt().getText();
             if (!strFolio.isEmpty() && strFolio.matches("-?\\d+(\\.\\d+)?")) {
@@ -67,7 +108,7 @@ public class CtrlInventario implements ActionListener {
                     //El inventario nos regresa un Producto, entonces eso lo asignamos a las casillas para que el 
                     //usuario pueda observar el producto
                     Producto producto = modeloInventario.buscaProducto(folio);
-
+                    vistaElimina.getIdLbl().setText(String.valueOf(producto.getId()));
                     vistaElimina.getMarcaLbl().setText("Marca: " + producto.getMarca());
                     vistaElimina.getModeloLbl().setText("Modelo: " + producto.getModelo());
                     vistaElimina.getPantallaLbl().setText("Pantalla: " + producto.getPantalla());
@@ -81,33 +122,33 @@ public class CtrlInventario implements ActionListener {
                     JOptionPane.showMessageDialog(null, "Producto no encontrado, intentelo de nuevo");
                     limpiarVistaEliminar();
                 }
-            } 
+            }
         }
-        
-        if (e.getSource() == vistaElimina.btnEliminaInventario){
-            String StrFolio = vistaElimina.getFolioTxt().getText();
-            if (!StrFolio.isEmpty() && StrFolio.matches("-?\\d+(\\.\\d+)?") ){
-                int folio = Integer.parseInt(vistaElimina.getFolioTxt().getText());
-                if(modeloInventario.eliminaProducto(folio)){
+
+        if (e.getSource() == vistaElimina.btnEliminaInventario) {
+            String StrFolio = vistaElimina.getIdLbl().getText();
+            if (!StrFolio.isEmpty() && StrFolio.matches("-?\\d+(\\.\\d+)?")) {
+                int folio = Integer.parseInt(StrFolio);
+                if (modeloInventario.eliminaProducto(folio)) {
                     JOptionPane.showMessageDialog(null, "El producto ha sido eliminado del inventario");
                     limpiarVistaEliminar();
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Para eliminar un producto, primero busca uno");
             }
-            
+
         }
-        
-        
+
         if (e.getSource() == vistaModificar.btnBuscar) {
 
             String strFolio = vistaModificar.getFolioTxt().getText();
             if (!strFolio.isEmpty() && strFolio.matches("-?\\d+(\\.\\d+)?")) {
                 int folio = Integer.parseInt(vistaModificar.getFolioTxt().getText());
-                
+
                 if (modeloInventario.buscaProducto(folio) != null) {
                     //El inventario nos regresa in Producto, entonces eso lo asignamos a las casillas para que el 
                     //usuario pueda modificarlo despues 
+                    vistaModificar.getIdLbl().setText(strFolio);
                     Producto producto = modeloInventario.buscaProducto(folio);
                     vistaModificar.getMarcaTxt().setText(producto.getMarca());
                     vistaModificar.getModeloTxt().setText(producto.getModelo());
@@ -123,153 +164,108 @@ public class CtrlInventario implements ActionListener {
                 }
             }
         }
-        
+
         if (e.getSource() == vistaModificar.btnModificaInventario) {
-            if (validaDatosModificados()) {
-                int id = Integer.parseInt(vistaModificar.getFolioTxt().getText());
-                String marca = vistaModificar.getMarcaTxt().getText();
-                String modelo = vistaModificar.getModeloTxt().getText();
-                String pantalla = vistaModificar.getPantallaTxt().getText();
-                String camara = vistaModificar.getCamaraTxt().getText();
-                String almacenamiento = vistaModificar.getAlmTxt().getText();
-                String ram = vistaModificar.getRamTxt().getText();
-                double precio = Double.parseDouble(vistaModificar.getPrecioTxt().getText());
-                int stock = Integer.parseInt(vistaModificar.getStockTxt().getValue().toString());
-                
-                boolean aux1 = modeloInventario.modificaInventario(id, stock, precio);
-                boolean aux2 = modeloInventario.modificaProducto(id, marca, modelo, pantalla, camara, almacenamiento, ram);
-                
-                if (aux1 && aux2){
+            String marca = vistaModificar.getMarcaTxt().getText();
+            String modelo = vistaModificar.getModeloTxt().getText();
+            String pantalla = vistaModificar.getPantallaTxt().getText();
+            String camara = vistaModificar.getCamaraTxt().getText();
+            String almacenamiento = vistaModificar.getAlmTxt().getText();
+            String ram = vistaModificar.getRamTxt().getText();
+            String precioStr = vistaModificar.getPrecioTxt().getText();
+            String stockStr = vistaModificar.getStockTxt().getValue().toString();
+            
+            if (validaDatos(marca, modelo, pantalla, camara, almacenamiento, ram, precioStr, stockStr)) {
+                int id = Integer.parseInt(vistaModificar.getIdLbl().getText());
+                int stock = Integer.parseInt(stockStr);
+                double precio = Double.parseDouble(precioStr);
+
+                boolean aux1 = modeloInventario.modificaProducto(id, marca, modelo, pantalla, camara, almacenamiento, ram, stock, precio);
+
+                if (aux1) {
                     limpiarVistaModificar();
                     JOptionPane.showMessageDialog(null, "El producto ha sido modificado");
                 }
-                        
 
             } else {
                 JOptionPane.showMessageDialog(null, "Los datos no son validos o hay campos vacios, intentelo de nuevo");
             }
 
         }
-        
-        
-        if (e.getSource() == vistaAgregar.btnAgregaInventario){
+
+        if (e.getSource() == vistaAgregar.btnAgregaInventario) {
             
+            String marca = vistaAgregar.getMarcaTxt().getText();
+            String modelo = vistaAgregar.getModeloTxt().getText();
+            String pantalla = vistaAgregar.getPantallaTxt().getText();
+            String camara = vistaAgregar.getCamaraTxt().getText();
+            String almacenamiento = vistaAgregar.getAlmTxt().getText();
+            String ram = vistaAgregar.getRamTxt().getText();
+            String precioStr = vistaAgregar.getPrecioTxt().getText();
+            String stockStr = vistaAgregar.getStockTxt().getValue().toString();
+
             //valida los datos 
-            if (validaDatosAgregados()) {
+            if (validaDatos(marca, modelo, pantalla, camara, almacenamiento, ram, precioStr, stockStr)) {
                 //Asignar valores recibidos a variables 
-                String marca = vistaAgregar.getMarcaTxt().getText();
-                String modelo = vistaAgregar.getModeloTxt().getText();
-                String pantalla = vistaAgregar.getPantallaTxt().getText();
-                String camara = vistaAgregar.getCamaraTxt().getText();
-                String almacenamiento = vistaAgregar.getAlmTxt().getText();
-                String ram = vistaAgregar.getRamTxt().getText();
-                double precio = Double.parseDouble(vistaAgregar.getPrecioTxt().getText());
-                int stock = Integer.parseInt(vistaAgregar.getStockTxt().getValue().toString());
                 
+                double precio = Double.parseDouble(precioStr);
+                int stock = Integer.parseInt(stockStr);
+
                 //Agregamos los datos a la bd 
-                int folio = modeloInventario.agregaDatosProducto(marca, modelo, pantalla, camara, almacenamiento, ram);
-                
-                if (folio > 0){
-                    if (modeloInventario.agregaProductoInventario(folio, precio, stock)){
-                        limpiarVistaAgregar();
-                        JOptionPane.showMessageDialog(null, "El producto ha sido agregado");
-                    }
+                if (modeloInventario.agregaProducto(marca, modelo, pantalla, camara, almacenamiento, ram, precio, stock)) {
+                    JOptionPane.showMessageDialog(null, "El producto ha sido agregado");
+                    limpiarVistaAgregar();
                 }
-                
-                
+
             } else {
                 JOptionPane.showMessageDialog(null, "Los datos no son validos o hay campos vacios, intentelo de nuevo");
             }
         }
     }
-    
-    
-    private boolean validaDatosAgregados() {
+
+    private boolean validaDatos(String marca, String modelo, String pantalla, String camara, String almacenamiento, String ram, String precio, String stock) {
         int contador = 0;
         boolean bandera = false;
-        if (!vistaAgregar.getMarcaTxt().getText().isEmpty()){
+        if (!marca.isEmpty()) {
             //Marca
             contador++;
         }
-        if (!vistaAgregar.getModeloTxt().getText().isEmpty()){
+        if (!modelo.isEmpty()) {
             //Modelo
             contador++;
         }
-        if (!vistaAgregar.getPantallaTxt().getText().isEmpty()){
+        if (!pantalla.isEmpty()) {
             //Pantalla
             contador++;
         }
-        if (!vistaAgregar.getCamaraTxt().getText().isEmpty()){
+        if (!camara.isEmpty()) {
             //Camara
             contador++;
         }
-        if (!vistaAgregar.getAlmTxt().getText().isEmpty()){
+        if (!almacenamiento.isEmpty()) {
             //Almacenamiento
             contador++;
         }
-        if (!vistaAgregar.getRamTxt().getText().isEmpty()){
+        if (!ram.isEmpty()) {
             //Almacenamiento
             contador++;
         }
-        // Verificar si precio y stock son números
-        String precioStr = vistaAgregar.getPrecioTxt().getText();
-        String stockStr = vistaAgregar.getStockTxt().getValue().toString();
-        if (!precioStr.isEmpty() && !stockStr.isEmpty()) {
-            if (precioStr.matches("-?\\d+(\\.\\d+)?") && stockStr.matches("-?\\d+(\\.\\d+)?")) {
+        
+        if (!precio.isEmpty() && !stock.isEmpty()) {
+            if (precio.matches("-?\\d+(\\.\\d+)?") && stock.matches("-?\\d+(\\.\\d+)?")) {
                 contador++; // Incrementar contador si ambos precios y stock son números válidos
                 System.out.println("Numeros validos");
             }
         }
-        // Si todos los campos requeridos están llenos, establecer bandera en true
+        
+// Si todos los campos requeridos están llenos, establecer bandera en true
         if (contador == 7) {
             bandera = true;
         }
+        
         return bandera;
     }
-    
-    private boolean validaDatosModificados() {
-        int contador = 0;
-        boolean bandera = false;
-        if (!vistaModificar.getMarcaTxt().getText().isEmpty()){
-            //Marca
-            contador++;
-        }
-        if (!vistaModificar.getModeloTxt().getText().isEmpty()){
-            //Modelo
-            contador++;
-        }
-        if (!vistaModificar.getPantallaTxt().getText().isEmpty()){
-            //Pantalla
-            contador++;
-        }
-        if (!vistaModificar.getCamaraTxt().getText().isEmpty()){
-            //Camara
-            contador++;
-        }
-        if (!vistaModificar.getAlmTxt().getText().isEmpty()){
-            //Almacenamiento
-            contador++;
-        }
-        if (!vistaModificar.getRamTxt().getText().isEmpty()){
-            //Almacenamiento
-            contador++;
-        }
-        // Verificar si precio y stock son números
-        String precioStr = vistaModificar.getPrecioTxt().getText();
-        String stockStr = vistaModificar.getStockTxt().getValue().toString();
-        if (!precioStr.isEmpty() && !stockStr.isEmpty()) {
-            if (precioStr.matches("-?\\d+(\\.\\d+)?") && stockStr.matches("-?\\d+(\\.\\d+)?")) {
-                contador++; // Incrementar contador si ambos precios y stock son números válidos
-                System.out.println("Numeros validos");
-            }
-        }
-        // Si todos los campos requeridos están llenos, establecer bandera en true
-        if (contador == 7) {
-            bandera = true;
-        }
-        return bandera;
-    }
-    
+
     private void limpiarVistaAgregar() {
         vistaAgregar.getMarcaTxt().setText("");
         vistaAgregar.getModeloTxt().setText("");
@@ -280,7 +276,7 @@ public class CtrlInventario implements ActionListener {
         vistaAgregar.getPrecioTxt().setText("");
         vistaAgregar.getStockTxt().setValue(0);
     }
-    
+
     private void limpiarVistaModificar() {
         vistaModificar.getFolioTxt().setText("");
         vistaModificar.getMarcaTxt().setText("");
@@ -291,9 +287,11 @@ public class CtrlInventario implements ActionListener {
         vistaModificar.getRamTxt().setText("");
         vistaModificar.getPrecioTxt().setText("");
         vistaModificar.getStockTxt().setValue(0);
+        vistaModificar.getIdLbl().setText("-");
     }
-    
+
     private void limpiarVistaEliminar() {
+        vistaElimina.getIdLbl().setText("-");
         vistaElimina.getFolioTxt().setText("");
         vistaElimina.getMarcaLbl().setText("Marca:");
         vistaElimina.getModeloLbl().setText("Modelo:");
@@ -305,4 +303,24 @@ public class CtrlInventario implements ActionListener {
         vistaElimina.getPrecioLbl().setText("Precio:");
     }
 
+    private DefaultTableModel listar(JTable tabla) {
+        DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
+        List<Producto> lista = modeloInventario.listar();
+        Object[] object = new Object[9];
+
+        for (int i = 0; i < lista.size(); i++) {
+            object[0] = lista.get(i).getId();
+            object[1] = lista.get(i).getMarca();
+            object[2] = lista.get(i).getModelo();
+            object[3] = lista.get(i).getPantalla();
+            object[4] = lista.get(i).getCamara();
+            object[5] = lista.get(i).getAlmacenamiento();
+            object[6] = lista.get(i).getRam();
+            object[7] = lista.get(i).getPrecio();
+            object[8] = lista.get(i).getStock();
+            modelo.addRow(object);
+        }
+        return modelo;
+
+    }
 }
