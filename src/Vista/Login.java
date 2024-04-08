@@ -4,8 +4,6 @@
  */
 package Vista;
 
-import Controlador.CtrlAdministracion;
-import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 

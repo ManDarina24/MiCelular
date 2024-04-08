@@ -1,6 +1,4 @@
-
 package Modelo;
-
 
 public class Producto {
     private int id;

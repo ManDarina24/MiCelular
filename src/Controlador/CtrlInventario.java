@@ -68,6 +68,7 @@ public class CtrlInventario implements ActionListener {
         if (e.getSource() == vistaCatalogo.btnRegresar ){
             vistaCatalogo.setVisible(false);
             iniciar();
+            
         }
         
         if (e.getSource() == vistaInv.btnAgregar) {
@@ -183,8 +184,8 @@ public class CtrlInventario implements ActionListener {
                 boolean aux1 = modeloInventario.modificaProducto(id, marca, modelo, pantalla, camara, almacenamiento, ram, stock, precio);
 
                 if (aux1) {
-                    limpiarVistaModificar();
                     JOptionPane.showMessageDialog(null, "El producto ha sido modificado");
+                    limpiarVistaModificar();
                 }
 
             } else {
@@ -305,6 +306,10 @@ public class CtrlInventario implements ActionListener {
 
     private DefaultTableModel listar(JTable tabla) {
         DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
+
+        while (modelo.getRowCount() > 0) {
+            modelo.removeRow(0);
+        }
         List<Producto> lista = modeloInventario.listar();
         Object[] object = new Object[9];
 
