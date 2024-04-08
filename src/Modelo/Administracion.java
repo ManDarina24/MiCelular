@@ -12,7 +12,7 @@ public class Administracion {
         boolean autenticado = false;
         String contraseñaEncriptadaIngresada = encriptarMD5(contraseñaIngresada);
 
-        String sql = "SELECT contrasenia FROM administrador WHERE usuario = ?";
+        String sql = "SELECT contrasenia FROM administrador WHERE BINARY usuario = ?";
 
         try (Connection conn = ConexionDB.conectar();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
