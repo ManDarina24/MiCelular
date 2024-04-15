@@ -160,5 +160,29 @@ public class Inventario {
         }
         return productos;
     }
+    
+    public boolean modificaStockProducto(int idProducto, int nuevoStock) {
+        String updateStockSQL = "UPDATE Inventario SET stock = ? WHERE id_Producto = ?";
+
+        try ( Connection conn = ConexionDB.conectar();  PreparedStatement pstmtStock = conn.prepareStatement(updateStockSQL)) {
+
+            // Actualizar el stock del producto
+            pstmtStock.setInt(1, nuevoStock);
+            pstmtStock.setInt(2, idProducto);
+
+            // Ejecutar la actualización del stock del producto
+            int filasActualizadas = pstmtStock.executeUpdate();
+
+            // Devolver verdadero si se actualizó al menos una fila
+            return filasActualizadas > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Si hay algún error, retornar falso
+        return false;
+    }
+
 
 }

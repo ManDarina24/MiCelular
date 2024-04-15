@@ -21,6 +21,7 @@ public class CtrlAdministracion implements ActionListener{
         this.vistaLogin.btnIngresar.addActionListener(this);
         this.vistaMenu.btnInventario.addActionListener(this);
         this.vistaMenu.btnSalir.addActionListener(this);
+        this.vistaMenu.btnVenta.addActionListener(this);
     }
     
     public void iniciar(){
@@ -70,10 +71,11 @@ public class CtrlAdministracion implements ActionListener{
             vistaLogin.getUsuarioTXT().setText("");
             vistaLogin.getContraseniaTXT().setText("");
         }
-
-    }
-    
-    
-    
-    
+        
+        if (e.getSource() == vistaMenu.btnVenta) {
+            vistaMenu.setVisible(false);
+            CtrlVenta ctrlVenta = new CtrlVenta();
+            ctrlVenta.iniciar();
+        }
+    }  
 }

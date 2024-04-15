@@ -21,7 +21,7 @@ public class CtrlInventario implements ActionListener {
     private final EliminaProducto vistaElimina = new EliminaProducto();
     private final Inventario modeloInventario = new Inventario();
     private final Catalogo vistaCatalogo = new Catalogo();
-    private final CtrlAdministracion  admin = new CtrlAdministracion();
+    private final CtrlAdministracion admin = new CtrlAdministracion();
 
     public CtrlInventario() {
         this.vistaInv.btnAgregar.addActionListener(this);
@@ -49,28 +49,28 @@ public class CtrlInventario implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         //Vista Inventario
-        if (e.getSource() == vistaInv.btnRegresar){
+        if (e.getSource() == vistaInv.btnRegresar) {
             vistaInv.setVisible(false);
             admin.mostrarMenuPrincipal();
         }
-        if (e.getSource() == vistaElimina.btnRegresar){
+        if (e.getSource() == vistaElimina.btnRegresar) {
             vistaElimina.setVisible(false);
             iniciar();
         }
-        if (e.getSource() == vistaModificar.btnRegresar ){
+        if (e.getSource() == vistaModificar.btnRegresar) {
             vistaModificar.setVisible(false);
             iniciar();
         }
-        if (e.getSource() == vistaAgregar.btnRegresar ){
+        if (e.getSource() == vistaAgregar.btnRegresar) {
             vistaAgregar.setVisible(false);
             iniciar();
         }
-        if (e.getSource() == vistaCatalogo.btnRegresar ){
+        if (e.getSource() == vistaCatalogo.btnRegresar) {
             vistaCatalogo.setVisible(false);
             iniciar();
-            
+
         }
-        
+
         if (e.getSource() == vistaInv.btnAgregar) {
             vistaInv.setVisible(false);
             vistaAgregar.setVisible(true);
@@ -116,7 +116,7 @@ public class CtrlInventario implements ActionListener {
                     vistaElimina.getAlmLbl().setText("Almacenamiento: " + producto.getAlmacenamiento());
                     vistaElimina.getCamaraLbl().setText("Camara: " + producto.getCamara());
                     vistaElimina.getRamLbl().setText("Ram: " + producto.getRam());
-                    vistaElimina.getStockLbl().setText("Cantidad disponible: " + String.valueOf(producto.getStock()));
+                    vistaElimina.getStockLbl().setText("Cantidad disponible: " + String.valueOf(producto.getCantidad()));
                     vistaElimina.getPrecioLbl().setText("Precio: " + String.valueOf(producto.getPrecio()));
 
                 } else {
@@ -157,7 +157,7 @@ public class CtrlInventario implements ActionListener {
                     vistaModificar.getAlmTxt().setText(producto.getAlmacenamiento());
                     vistaModificar.getCamaraTxt().setText(producto.getCamara());
                     vistaModificar.getRamTxt().setText(producto.getRam());
-                    vistaModificar.getStockTxt().setValue(producto.getStock());
+                    vistaModificar.getStockTxt().setValue(producto.getCantidad());
                     vistaModificar.getPrecioTxt().setText(String.valueOf(producto.getPrecio()));
                 } else {
                     JOptionPane.showMessageDialog(null, "Producto no encontrado, intentelo de nuevo");
@@ -175,7 +175,7 @@ public class CtrlInventario implements ActionListener {
             String ram = vistaModificar.getRamTxt().getText();
             String precioStr = vistaModificar.getPrecioTxt().getText();
             String stockStr = vistaModificar.getStockTxt().getValue().toString();
-            
+
             if (validaDatos(marca, modelo, pantalla, camara, almacenamiento, ram, precioStr, stockStr)) {
                 int id = Integer.parseInt(vistaModificar.getIdLbl().getText());
                 int stock = Integer.parseInt(stockStr);
@@ -195,7 +195,7 @@ public class CtrlInventario implements ActionListener {
         }
 
         if (e.getSource() == vistaAgregar.btnAgregaInventario) {
-            
+
             String marca = vistaAgregar.getMarcaTxt().getText();
             String modelo = vistaAgregar.getModeloTxt().getText();
             String pantalla = vistaAgregar.getPantallaTxt().getText();
@@ -208,7 +208,7 @@ public class CtrlInventario implements ActionListener {
             //valida los datos 
             if (validaDatos(marca, modelo, pantalla, camara, almacenamiento, ram, precioStr, stockStr)) {
                 //Asignar valores recibidos a variables 
-                
+
                 double precio = Double.parseDouble(precioStr);
                 int stock = Integer.parseInt(stockStr);
 
@@ -251,19 +251,19 @@ public class CtrlInventario implements ActionListener {
             //Almacenamiento
             contador++;
         }
-        
+
         if (!precio.isEmpty() && !stock.isEmpty()) {
             if (precio.matches("-?\\d+(\\.\\d+)?") && stock.matches("-?\\d+(\\.\\d+)?")) {
                 contador++; // Incrementar contador si ambos precios y stock son números válidos
                 System.out.println("Numeros validos");
             }
         }
-        
+
 // Si todos los campos requeridos están llenos, establecer bandera en true
         if (contador == 7) {
             bandera = true;
         }
-        
+
         return bandera;
     }
 
@@ -322,7 +322,7 @@ public class CtrlInventario implements ActionListener {
             object[5] = lista.get(i).getAlmacenamiento();
             object[6] = lista.get(i).getRam();
             object[7] = lista.get(i).getPrecio();
-            object[8] = lista.get(i).getStock();
+            object[8] = lista.get(i).getCantidad();
             modelo.addRow(object);
         }
         return modelo;

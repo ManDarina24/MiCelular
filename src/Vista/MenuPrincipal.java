@@ -61,7 +61,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnVenta.setBackground(new java.awt.Color(0, 102, 153));
         btnVenta.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         btnVenta.setForeground(new java.awt.Color(255, 255, 255));
-        btnVenta.setText("Generar reporte");
+        btnVenta.setText("Generar venta");
         btnVenta.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);

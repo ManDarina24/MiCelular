@@ -1,6 +1,8 @@
 package Controlador;
 
-import Modelo.Inventario;
+import Modelo.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -13,7 +15,22 @@ public class Main {
         CtrlAdministracion admin = new CtrlAdministracion();
         admin.iniciar();
         
+        //Venta venta = new Venta();
         
+        /*Inventario inventario = new Inventario();
+        inventario.modificaStockProducto(2, 1);*/
+        /*Cliente cliente = new Cliente("Mariel", "Hernandez", "Cervantes", 2465897100L, "mari@gmail.com");
+        cliente.setId(venta.registraCliente(cliente));
+        System.out.println("Cliente: "+cliente.getId());
+        Producto producto1 = new Producto(2, 1, 14499);
+        Producto producto2 = new Producto(12, 1, 5000);
+        List<Producto> productos = new ArrayList<>();
+        productos.add(producto2);
+        productos.add(producto1);
+        
+        System.out.println(venta.registraVenta(cliente.getId(), productos, 19999, Venta.MetodoPago.efectivo, "Administrador"));*/
+        //System.out.println(venta.registraCliente("Aram", "Espinosa", "Tlatelpa", 2462085266L, "aram@gmail.com"));
+        //System.out.println(venta.registraCliente());
         //Inventario inventario = new Inventario();
         //System.out.println(inventario.buscaProducto(15));
         //System.out.println(inventario.eliminaProducto(0));

@@ -1,15 +1,21 @@
 package Modelo;
 
 public class Producto {
-    private int id;
-    private String marca;
-    private String modelo;
-    private String pantalla;
-    private String almacenamiento;
-    private String camara;
-    private String ram;
-    private int stock;
-    private double precio;
+    protected int id;
+    protected String marca;
+    protected String modelo;
+    protected String pantalla;
+    protected String almacenamiento;
+    protected String camara;
+    protected String ram;
+    protected int cantidad;
+    protected double precio;
+
+    public Producto(int id, int cantidad, double precio) {
+        this.id = id;
+        this.cantidad = cantidad;
+        this.precio = precio;
+    }
 
     public Producto(int id, String marca, String modelo, String pantalla, String almacenamiento, String camara, String ram, int stock, double precio) {
         this.id = id;
@@ -19,7 +25,7 @@ public class Producto {
         this.almacenamiento = almacenamiento;
         this.camara = camara;
         this.ram = ram;
-        this.stock = stock;
+        this.cantidad = stock;
         this.precio = precio;
     }
     
@@ -51,12 +57,16 @@ public class Producto {
         return ram;
     }
 
-    public int getStock() {
-        return stock;
+    public int getCantidad() {
+        return cantidad;
     }
 
     public double getPrecio() {
         return precio;
+    }
+    
+    public void setCantidad(int cant){
+        this.cantidad = cant;
     }
     
 }
