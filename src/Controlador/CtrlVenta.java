@@ -2,22 +2,29 @@ package Controlador;
 
 import Modelo.*;
 import Vista.*;
+import com.itextpdf.text.DocumentException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.Timer;
 
 /**
  *
  * @author darina
  */
-public class CtrlVenta implements ActionListener, ListSelectionListener{
+public class CtrlVenta implements ActionListener, ListSelectionListener, DocumentListener {
     private List<Producto> productosCanasta = new ArrayList<>();
     private VVenta vistaVenta = new VVenta();
     private Inventario modeloInventario = new Inventario();
@@ -28,6 +35,8 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
     private Cliente modeloCliente;
     private InfoVenta vistaDetalles = new InfoVenta();
     private Venta modeloVenta = new Venta();
+    private PagoEnEfectivo vistaEfectivo = new PagoEnEfectivo(); 
+    private PagoConTarjeta vistaTarjeta = new PagoConTarjeta();
     
     public CtrlVenta(){
         
@@ -46,7 +55,13 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
         this.vistaCliente.btnRegresar.addActionListener(this);
         this.vistaDetalles.btnRegresar1.addActionListener(this);
         this.vistaDetalles.btnCancelar.addActionListener(this);
-        this.vistaDetalles.btnPagar.addActionListener(this);
+        this.vistaDetalles.btnPagarEfectivo.addActionListener(this);
+        this.vistaEfectivo.montoTxt.getDocument().addDocumentListener(this);
+        this.vistaEfectivo.btnPagar.addActionListener(this);
+        this.vistaEfectivo.btnRegresar.addActionListener(this);
+        this.vistaDetalles.btnPagarTarjeta.addActionListener(this);
+        this.vistaTarjeta.btnPagar.addActionListener(this);
+        this.vistaTarjeta.btnRegresar.addActionListener(this);
     }
     
     public void iniciar(){
@@ -57,6 +72,7 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
         vistaVenta.btnAgregar.setEnabled(false);
         canasta.btnBasura.setEnabled(false);
         vistaVenta.btnSiguiente.setEnabled(false);
+        vistaEfectivo.btnPagar.setEnabled(false);
     }
     
     
@@ -170,15 +186,8 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
             vistaVenta.setEnabled(false);
             canasta.tabla.setModel(listarCanasta(canasta.tabla));
            
-            double total = 0;
-            if (!productosCanasta.isEmpty()){
-                
-                for (int i = 0; i < productosCanasta.size(); i++){
-                    total = total + (productosCanasta.get(i).getPrecio() * productosCanasta.get(i).getCantidad());
-                }
-                canasta.lblTotal.setText("Total: $" + total);
-            }
-        
+            double total = Pago.calcularTotal(productosCanasta);
+            canasta.lblTotal.setText("Total: $" + total);
         }
         
         if (e.getSource() == canasta.btnAceptar){
@@ -208,15 +217,10 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
             
             canasta.tabla.setModel(listarCanasta(canasta.tabla));
             
-            double total = 0;
-            if (!productosCanasta.isEmpty()){
-                
-                for (int i = 0; i < productosCanasta.size(); i++){
-                    total = total + (productosCanasta.get(i).getPrecio() * productosCanasta.get(i).getCantidad());
-                }
-                canasta.lblTotal.setText("Total: $" + total);
-            } else {
-                canasta.lblTotal.setText("Total: $" + 0);
+            double total = Pago.calcularTotal(productosCanasta);
+            canasta.lblTotal.setText("Total: $" + total);
+            
+            if (total == 0){
                 vistaVenta.btnSiguiente.setEnabled(false);
             }
         }
@@ -258,12 +262,7 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
                 vistaDetalles.tabla.setModel(listarCanasta(vistaDetalles.tabla));
                 vistaDetalles.tablaClientes.setModel(listarCliente(vistaDetalles.tablaClientes));
 
-                //here
-                double total = 0;
-
-                for (int i = 0; i < productosCanasta.size(); i++) {
-                    total = total + (productosCanasta.get(i).getPrecio() * productosCanasta.get(i).getCantidad());
-                }
+                double total = Pago.calcularTotal(productosCanasta);
                 vistaDetalles.totalFinal.setText(String.valueOf(total));
             } else {
                 String[] opciones = {"Aceptar"};
@@ -285,35 +284,142 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
             vistaDetalles.setVisible(false);
         }
         
-        if (e.getSource() == vistaDetalles.btnPagar) {
+        if (e.getSource() == vistaDetalles.btnPagarEfectivo){
+            vistaEfectivo.setVisible(true);
+            vistaEfectivo.setLocationRelativeTo(null);
+            vistaEfectivo.setTitle("Efectivo");
+            vistaDetalles.setEnabled(false);
+            double total = Pago.calcularTotal(productosCanasta);
+            vistaEfectivo.lblTotal.setText(String.valueOf(total));
+        }
+        
+        if (e.getSource() == vistaDetalles.btnPagarTarjeta){
+            vistaTarjeta.setVisible(true);
+            vistaTarjeta.setLocationRelativeTo(null);
+            vistaTarjeta.setTitle("Tarjeta");
+            vistaDetalles.setEnabled(false);
+            double total = Pago.calcularTotal(productosCanasta);
+            vistaTarjeta.lblTotal.setText(String.valueOf(total));
+        }
+        
+        if (e.getSource() == vistaTarjeta.btnPagar) {
             String[] opciones = {"Aceptar", "Cancelar"};
-            int opc = JOptionPane.showOptionDialog(null, "¿Deseas continuar con la venta?", "Pago", 0, JOptionPane.QUESTION_MESSAGE, null, opciones, "Aceptar");
-            
-            if (opc == 0){
-                
-                double total = 0;
+            int opc = JOptionPane.showOptionDialog(null, "¿Deseas continuar con el pago?", "Pago", 0, JOptionPane.QUESTION_MESSAGE, null, opciones, "Aceptar");
 
-                for (int i = 0; i < productosCanasta.size(); i++) {
-                    total = total + (productosCanasta.get(i).getPrecio() * productosCanasta.get(i).getCantidad());
-                }
+            if (opc == 0) {
+                vistaTarjeta.btnPagar.setEnabled(false);
 
-                //Guarda en la bd
-                int id = modeloVenta.registraCliente(modeloCliente);
-                modeloVenta.registraVenta(id, productosCanasta, total, Venta.MetodoPago.efectivo, "Administrador");
-                
-                for(int i = 0; i < productosCanasta.size(); i++){
-                    Producto producto = modeloInventario.buscaProducto(productosCanasta.get(i).getId());
-                    int cantidadNueva = producto.getCantidad() - productosCanasta.get(i).getCantidad();
-                    modeloInventario.modificaStockProducto(producto.getId(), cantidadNueva);
-                }
-                
-                String[] conf = {"Aceptar"};
-                JOptionPane.showOptionDialog(null, "El pago se ha realizado de manera exitosa", "Pago", 0, JOptionPane.INFORMATION_MESSAGE, null, conf, "Aceptar");
-      
-                //Redirige
-                vistaDetalles.setVisible(false);
-                admin.mostrarMenuPrincipal();
+                // Primera tarea: Cambiar el texto del proceso a "El usuario puede ingresar su tarjeta"
+                Timer timer1 = new Timer(2000, (event) -> {
+                    vistaTarjeta.proceso.setText("El usuario puede ingresar su tarjeta");
+
+                    // Segunda tarea: Cambiar el texto del proceso a "El usuario puede ingresar su pin"
+                    Timer timer2 = new Timer(2000, (event2) -> {
+                        vistaTarjeta.proceso.setText("El usuario puede ingresar su pin");
+
+                        // Tercera tarea: Cambiar el texto del proceso a "Validando datos con el banco"
+                        Timer timer3 = new Timer(4000, (event3) -> {
+                            vistaTarjeta.proceso.setText("Validando datos con el banco");
+                            PagoTarjeta tarjeta = new PagoTarjeta();
+                            
+                            
+                            if (tarjeta.validarPago()) {
+                                try {
+                                    // Mostrar mensaje de éxito
+                                    String[] conf = {"Aceptar"};
+                                    JOptionPane.showOptionDialog(null, "El pago se ha realizado de manera exitosa", "Pago", 0, JOptionPane.INFORMATION_MESSAGE, null, conf, "Aceptar");
+                                    
+                                    double total = Pago.calcularTotal(productosCanasta);
+                                    //Registra la venta
+                                    int id = modeloVenta.registraCliente(modeloCliente);
+                                    
+                                    modeloCliente.setId(id);
+                                    int folioVenta = modeloVenta.registraVenta(id, productosCanasta, total, Venta.MetodoPago.tarjeta, "Administrador");
+                                    
+                                    //Disminuir Stock
+                                    for (int i = 0; i < productosCanasta.size(); i++) {
+                                        Producto producto = modeloInventario.buscaProducto(productosCanasta.get(i).getId());
+                                        int cantidadNueva = producto.getCantidad() - productosCanasta.get(i).getCantidad();
+                                        modeloInventario.modificaStockProducto(producto.getId(), cantidadNueva);
+                                    }
+                                    Pago.generarRecibo(folioVenta, productosCanasta, modeloCliente, 0, "tarjeta");
+                                    //Redirige
+                                    vistaDetalles.setVisible(false);
+                                    vistaTarjeta.setVisible(false);
+                                    admin.mostrarMenuPrincipal();
+                                } catch (FileNotFoundException ex) {
+                                    Logger.getLogger(CtrlVenta.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (DocumentException ex) {
+                                    Logger.getLogger(CtrlVenta.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            } else {
+                                String[] conf = {"Aceptar"};
+                                JOptionPane.showOptionDialog(null, "Tarjeta no valida, intentelo de nuevo", "Pago", 0, JOptionPane.ERROR_MESSAGE, null, conf, "Aceptar");
+
+                            }
+
+                        });
+                        timer3.setRepeats(false); // Esta tarea se ejecuta una sola vez
+                        timer3.start(); // Comienza la tercera tarea
+                    });
+                    timer2.setRepeats(false); // Esta tarea se ejecuta una sola vez
+                    timer2.start(); // Comienza la segunda tarea
+                });
+                timer1.setRepeats(false); // Esta tarea se ejecuta una sola vez
+                timer1.start(); // Comienza la primera tarea
             }
+        }
+        
+        if (e.getSource() == vistaEfectivo.btnPagar) {
+            String[] opciones = {"Aceptar", "Cancelar"};
+            int opc = JOptionPane.showOptionDialog(null, "¿Deseas continuar con el pago?", "Pago", 0, JOptionPane.QUESTION_MESSAGE, null, opciones, "Aceptar");
+
+            if (opc == 0) {
+
+                try {
+                    double total = Pago.calcularTotal(productosCanasta);
+                    //Registra la venta
+                    int id = modeloVenta.registraCliente(modeloCliente);
+                    
+                    modeloCliente.setId(id);
+                    int folioVenta = modeloVenta.registraVenta(id, productosCanasta, total, Venta.MetodoPago.efectivo, "Administrador");
+                    
+                    //Disminuir Stock
+                    for (int i = 0; i < productosCanasta.size(); i++) {
+                        Producto producto = modeloInventario.buscaProducto(productosCanasta.get(i).getId());
+                        int cantidadNueva = producto.getCantidad() - productosCanasta.get(i).getCantidad();
+                        modeloInventario.modificaStockProducto(producto.getId(), cantidadNueva);
+                    }
+                    //Generar recibo
+                    Pago.generarRecibo(folioVenta, productosCanasta, modeloCliente, Double.parseDouble(vistaEfectivo.montoTxt.getText()), "efectivo");
+                    
+                    String[] conf = {"Aceptar"};
+                    JOptionPane.showOptionDialog(null, "El pago se ha realizado de manera exitosa", "Pago", 0, JOptionPane.INFORMATION_MESSAGE, null, conf, "Aceptar");
+                    
+                    //Redirige
+                    vistaDetalles.setVisible(false);
+                    vistaEfectivo.setVisible(false);
+                    admin.mostrarMenuPrincipal();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(CtrlVenta.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (DocumentException ex) {
+                    Logger.getLogger(CtrlVenta.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        
+        if (e.getSource() == vistaTarjeta.btnRegresar){
+            vistaTarjeta.setVisible(false);
+            vistaDetalles.setEnabled(true);
+            vistaDetalles.setVisible(true);
+            
+        }
+        if (e.getSource() == vistaEfectivo.btnRegresar){
+            vistaEfectivo.setVisible(false);
+            vistaDetalles.setEnabled(true);
+            vistaDetalles.setVisible(true);
+            vistaEfectivo.cambioLbl.setText("0.0");
+            vistaEfectivo.montoTxt.setText("");
         }
         
         if (e.getSource() == vistaDetalles.btnCancelar) {
@@ -325,7 +431,7 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
                 admin.mostrarMenuPrincipal();
             }
         }
-
+        
     }
 
     private DefaultTableModel listar(JTable tabla, int folio) {
@@ -338,7 +444,7 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
         Object[] object = new Object[5];
         Producto producto = modeloInventario.buscaProducto(folio);
 
-        if (producto != null) {
+        if (producto != null && producto.getCantidad() > 0) {
             object[0] = producto.getId();
             object[1] = producto.getMarca();
             object[2] = producto.getModelo();
@@ -354,7 +460,10 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
                 object[2] = lista.get(i).getModelo();
                 object[3] = lista.get(i).getPrecio();
                 object[4] = lista.get(i).getCantidad();
-                modelo.addRow(object);
+                if (lista.get(i).getCantidad() > 0){
+                    modelo.addRow(object);
+                }
+                
             }
         }
 
@@ -383,7 +492,7 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
 
     }
     
-     private DefaultTableModel listarCliente(JTable tabla) {
+    private DefaultTableModel listarCliente(JTable tabla) {
         DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
 
         while (modelo.getRowCount() > 0) {
@@ -427,6 +536,39 @@ public class CtrlVenta implements ActionListener, ListSelectionListener{
 
         // Si pasa todas las validaciones, los datos son válidos
         return true;
+    }
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+        actualizarCambio();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+        actualizarCambio();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+        actualizarCambio();
+    }
+    
+    private void actualizarCambio() {
+        PagoEfectivo efectivo = new PagoEfectivo();
+        double total = Pago.calcularTotal(productosCanasta);
+        if (vistaEfectivo.montoTxt.getText().matches("\\d*\\.?\\d+")) {
+            double cambio = efectivo.calcularCambio(total, Double.parseDouble(vistaEfectivo.montoTxt.getText()));
+            vistaEfectivo.cambioLbl.setText(String.valueOf(cambio) + " pesos");
+
+            if (cambio >= 0) {
+                vistaEfectivo.btnPagar.setEnabled(true);
+            } else {
+                vistaEfectivo.btnPagar.setEnabled(false); // Bloquear el botón si el cambio es negativo
+            }
+        } else {
+            String[] opciones = {"Aceptar"};
+            JOptionPane.showOptionDialog(null, "Valor invalido", "Pago", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+            vistaEfectivo.btnPagar.setEnabled(false);
+        }
     }
     
 }

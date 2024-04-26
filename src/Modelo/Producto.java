@@ -11,11 +11,11 @@ public class Producto {
     protected int cantidad;
     protected double precio;
 
-    public Producto(int id, int cantidad, double precio) {
+    /* Producto(int id, int cantidad, double precio) {
         this.id = id;
         this.cantidad = cantidad;
         this.precio = precio;
-    }
+    }*/
 
     public Producto(int id, String marca, String modelo, String pantalla, String almacenamiento, String camara, String ram, int stock, double precio) {
         this.id = id;

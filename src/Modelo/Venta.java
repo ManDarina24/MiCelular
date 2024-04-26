@@ -42,8 +42,8 @@ public class Venta {
     return id;
 }
 
-    public boolean registraVenta(int idCliente, List<Producto> productos, double total, MetodoPago metodoPago, String usuarioResp) {
-        String insertVentaSQL = "INSERT INTO RegistroVenta (id_Cliente, fechaVenta, total, metodoPago, usuarioResp) VALUES (?,  CURRENT_TIMESTAMP, ?, ?, ?)";
+    public int registraVenta(int idCliente, List<Producto> productos, double total, MetodoPago metodoPago, String usuarioResp) {
+        String insertVentaSQL = "INSERT INTO RegistroVenta (id_Cliente, fechaVenta, total, metodoPago, usuarioResp) VALUES (?,  CURDATE(), ?, ?, ?)";
         String insertDetalleVentaSQL = "INSERT INTO DetalleVenta (folio_Venta, id_Producto, cantidadVendida, subTotal) VALUES (?, ?, ?, ?)";
 
         try ( Connection conn = ConexionDB.conectar();  PreparedStatement pstmtVenta = conn.prepareStatement(insertVentaSQL, Statement.RETURN_GENERATED_KEYS);  PreparedStatement pstmtDetalleVenta = conn.prepareStatement(insertDetalleVentaSQL)) {
@@ -85,12 +85,12 @@ public class Venta {
                     }
                 }
 
-                return true; // La venta y sus detalles se registraron correctamente
+                return folioVenta; // La venta y sus detalles se registraron correctamente
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false; // Ocurrió un error al registrar la venta y/o sus detalles
+        return 0; // Ocurrió un error al registrar la venta y/o sus detalles
     }
 
     public enum MetodoPago {

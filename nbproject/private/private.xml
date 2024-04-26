@@ -3,14 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/jocel/OneDrive/Documentos/NetBeansProjects/MiCelular/src/Controlador/CtrlInventario.java</file>
             <file>file:/C:/Users/jocel/OneDrive/Documentos/NetBeansProjects/MiCelular/src/Modelo/Producto.java</file>
             <file>file:/C:/Users/jocel/OneDrive/Documentos/NetBeansProjects/MiCelular/src/Controlador/CtrlVenta.java</file>
-            <file>file:/C:/Users/jocel/OneDrive/Documentos/NetBeansProjects/MiCelular/src/Vista/AgregarConfirmacion.java</file>
-            <file>file:/C:/Users/jocel/OneDrive/Documentos/NetBeansProjects/MiCelular/src/Controlador/Main.java</file>
-            <file>file:/C:/Users/jocel/OneDrive/Documentos/NetBeansProjects/MiCelular/src/Vista/Canasta.java</file>
-            <file>file:/C:/Users/jocel/OneDrive/Documentos/NetBeansProjects/MiCelular/src/Modelo/Inventario.java</file>
-            <file>file:/C:/Users/jocel/OneDrive/Documentos/NetBeansProjects/MiCelular/src/Vista/VVenta.java</file>
+            <file>file:/C:/Users/jocel/OneDrive/Documentos/NetBeansProjects/MiCelular/src/Modelo/Pago.java</file>
         </group>
     </open-files>
 </project-private>
