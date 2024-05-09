@@ -83,20 +83,34 @@ public class Inventario {
 
     public boolean eliminaProducto(int folio) {
         boolean bandera = false;
-        String sqlInventario = "DELETE FROM inventario WHERE id_Producto = ?";
-        String sqlProducto = "DELETE FROM producto WHERE id = ?";
+        String sqlCheckDetalleVenta = "SELECT COUNT(*) AS count FROM DetalleVenta WHERE folio_Venta = ?";
+        String sqlDeleteInventario = "DELETE FROM inventario WHERE id_producto = ?";
+        String sqlDeleteProducto = "DELETE FROM producto WHERE id = ?";
 
-        try ( Connection conn = ConexionDB.conectar();  PreparedStatement pstmtInv = conn.prepareStatement(sqlInventario);  PreparedStatement pstmtProd = conn.prepareStatement(sqlProducto)) {
+        try ( Connection conn = ConexionDB.conectar();  PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheckDetalleVenta);  PreparedStatement pstmtDeleteInventario = conn.prepareStatement(sqlDeleteInventario);  PreparedStatement pstmtDeleteProducto = conn.prepareStatement(sqlDeleteProducto)) {
 
-            pstmtInv.setInt(1, folio);
-            pstmtProd.setInt(1, folio);
+            pstmtCheck.setInt(1, folio);
+            ResultSet rs = pstmtCheck.executeQuery();
+            rs.next();
+            int count = rs.getInt("count");
 
-            if (pstmtInv.executeUpdate() == 1 && pstmtProd.executeUpdate() == 1) {
-                bandera = true;
+            if (count > 0) {
+                // Hay registros en DetalleVenta, solo elimina de inventario
+                pstmtDeleteInventario.setInt(1, folio);
+                if (pstmtDeleteInventario.executeUpdate() == 1) {
+                    bandera = true;
+                }
+            } else {
+                // No hay registros en DetalleVenta, elimina ambos
+                pstmtDeleteInventario.setInt(1, folio);
+                pstmtDeleteProducto.setInt(1, folio);
+
+                if (pstmtDeleteInventario.executeUpdate() == 1 && pstmtDeleteProducto.executeUpdate() == 1) {
+                    bandera = true;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-
         }
         return bandera;
     }
@@ -160,7 +174,7 @@ public class Inventario {
         }
         return productos;
     }
-    
+
     public boolean modificaStockProducto(int idProducto, int nuevoStock) {
         String updateStockSQL = "UPDATE Inventario SET stock = ? WHERE id_Producto = ?";
 
@@ -183,6 +197,5 @@ public class Inventario {
         // Si hay algún error, retornar falso
         return false;
     }
-
 
 }

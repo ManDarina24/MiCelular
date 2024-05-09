@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -76,6 +77,11 @@ public class CtrlInventario implements ActionListener {
             vistaAgregar.setVisible(true);
             vistaAgregar.setTitle("Agregar producto");
             vistaAgregar.setLocationRelativeTo(null);
+            
+            SpinnerNumberModel modeloSpinner = (SpinnerNumberModel) vistaAgregar.stockTxt.getModel();
+            modeloSpinner.setMinimum(0);
+            modeloSpinner.setValue(1);
+            vistaAgregar.stockTxt.setModel(modeloSpinner);
         }
 
         if (e.getSource() == vistaInv.btnModificar) {
@@ -83,6 +89,11 @@ public class CtrlInventario implements ActionListener {
             vistaModificar.setVisible(true);
             vistaModificar.setTitle("Modificar productos");
             vistaModificar.setLocationRelativeTo(null);
+            
+            SpinnerNumberModel modeloSpinner = (SpinnerNumberModel) vistaModificar.stockTxt.getModel();
+            modeloSpinner.setMinimum(0);
+            modeloSpinner.setValue(0);
+            vistaModificar.stockTxt.setModel(modeloSpinner);
         }
         //
         if (e.getSource() == vistaInv.btnEliminar) {
@@ -120,7 +131,9 @@ public class CtrlInventario implements ActionListener {
                     vistaElimina.getPrecioLbl().setText("Precio: " + String.valueOf(producto.getPrecio()));
 
                 } else {
-                    JOptionPane.showMessageDialog(null, "Producto no encontrado, intentelo de nuevo");
+                    String[] opciones = {"Aceptar"};
+                    JOptionPane.showOptionDialog(null, "Producto no encontrado, intentelo de nuevo", "Inventario", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+
                     limpiarVistaEliminar();
                 }
             }
@@ -129,13 +142,25 @@ public class CtrlInventario implements ActionListener {
         if (e.getSource() == vistaElimina.btnEliminaInventario) {
             String StrFolio = vistaElimina.getIdLbl().getText();
             if (!StrFolio.isEmpty() && StrFolio.matches("-?\\d+(\\.\\d+)?")) {
-                int folio = Integer.parseInt(StrFolio);
-                if (modeloInventario.eliminaProducto(folio)) {
-                    JOptionPane.showMessageDialog(null, "El producto ha sido eliminado del inventario");
-                    limpiarVistaEliminar();
+
+                //Confirmacion
+                String[] res = {"Aceptar", "Cancelar"};
+                int respuesta = JOptionPane.showOptionDialog(null, "¿Deseas eliminar este producto del inventario?", "Inventario", 0, JOptionPane.INFORMATION_MESSAGE, null, res, "Aceptar");
+
+                if (respuesta == 0) {
+                    int folio = Integer.parseInt(StrFolio);
+                    if (modeloInventario.eliminaProducto(folio)) {
+                        String[] opciones = {"Aceptar"};
+                        JOptionPane.showOptionDialog(null, "El producto ha sido eliminado del inventario", "Inventario", 0, JOptionPane.INFORMATION_MESSAGE, null, opciones, "Aceptar");
+
+                        limpiarVistaEliminar();
+                    }
                 }
+
             } else {
-                JOptionPane.showMessageDialog(null, "Para eliminar un producto, primero busca uno");
+                String[] opciones = {"Aceptar"};
+                JOptionPane.showOptionDialog(null, "Para eliminar un producto, primero busca uno", "Inventario", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+
             }
 
         }
@@ -160,7 +185,9 @@ public class CtrlInventario implements ActionListener {
                     vistaModificar.getStockTxt().setValue(producto.getCantidad());
                     vistaModificar.getPrecioTxt().setText(String.valueOf(producto.getPrecio()));
                 } else {
-                    JOptionPane.showMessageDialog(null, "Producto no encontrado, intentelo de nuevo");
+                    String[] opciones = {"Aceptar"};
+                    JOptionPane.showOptionDialog(null, "Producto no encontrado, intentelo de nuevo", "Inventario", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+
                     limpiarVistaModificar();
                 }
             }
@@ -175,22 +202,34 @@ public class CtrlInventario implements ActionListener {
             String ram = vistaModificar.getRamTxt().getText();
             String precioStr = vistaModificar.getPrecioTxt().getText();
             String stockStr = vistaModificar.getStockTxt().getValue().toString();
+            
+            //Confirmar
+            String[] res = {"Aceptar", "Cancelar"};
+            int respuesta = JOptionPane.showOptionDialog(null, "¿Deseas modificar este producto del inventario?", "Inventario", 0, JOptionPane.INFORMATION_MESSAGE, null, res, "Aceptar");
 
-            if (validaDatos(marca, modelo, pantalla, camara, almacenamiento, ram, precioStr, stockStr)) {
-                int id = Integer.parseInt(vistaModificar.getIdLbl().getText());
-                int stock = Integer.parseInt(stockStr);
-                double precio = Double.parseDouble(precioStr);
+            if (respuesta == 0) {
+                if (validaDatos(marca, modelo, pantalla, camara, almacenamiento, ram, precioStr, stockStr)) {
+                    int id = Integer.parseInt(vistaModificar.getIdLbl().getText());
+                    int stock = Integer.parseInt(stockStr);
+                    double precio = Double.parseDouble(precioStr);
 
-                boolean aux1 = modeloInventario.modificaProducto(id, marca, modelo, pantalla, camara, almacenamiento, ram, stock, precio);
+                    boolean aux1 = modeloInventario.modificaProducto(id, marca, modelo, pantalla, camara, almacenamiento, ram, stock, precio);
 
-                if (aux1) {
-                    JOptionPane.showMessageDialog(null, "El producto ha sido modificado");
-                    limpiarVistaModificar();
+                    if (aux1) {
+                        String[] opciones = {"Aceptar"};
+                        JOptionPane.showOptionDialog(null, "El producto ha sido modificado", "Inventario", 0, JOptionPane.INFORMATION_MESSAGE, null, opciones, "Aceptar");
+
+                        limpiarVistaModificar();
+                    }
+
+                } else {
+                    String[] opciones = {"Aceptar"};
+                    JOptionPane.showOptionDialog(null, "Los datos no son validos o hay campos vacios, intentelo de nuevo", "Inventario", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+
                 }
 
-            } else {
-                JOptionPane.showMessageDialog(null, "Los datos no son validos o hay campos vacios, intentelo de nuevo");
             }
+            
 
         }
 
@@ -204,23 +243,36 @@ public class CtrlInventario implements ActionListener {
             String ram = vistaAgregar.getRamTxt().getText();
             String precioStr = vistaAgregar.getPrecioTxt().getText();
             String stockStr = vistaAgregar.getStockTxt().getValue().toString();
+            
+            
+            //Confirmacion
+            String[] res = {"Aceptar", "Cancelar"};
+            int respuesta = JOptionPane.showOptionDialog(null, "¿Deseas modificar este producto del inventario?", "Inventario", 0, JOptionPane.INFORMATION_MESSAGE, null, res, "Aceptar");
 
-            //valida los datos 
-            if (validaDatos(marca, modelo, pantalla, camara, almacenamiento, ram, precioStr, stockStr)) {
-                //Asignar valores recibidos a variables 
+            if (respuesta == 0) {
+                //valida los datos 
+                if (validaDatos(marca, modelo, pantalla, camara, almacenamiento, ram, precioStr, stockStr)) {
+                    //Asignar valores recibidos a variables 
 
-                double precio = Double.parseDouble(precioStr);
-                int stock = Integer.parseInt(stockStr);
+                    double precio = Double.parseDouble(precioStr);
+                    int stock = Integer.parseInt(stockStr);
 
-                //Agregamos los datos a la bd 
-                if (modeloInventario.agregaProducto(marca, modelo, pantalla, camara, almacenamiento, ram, precio, stock)) {
-                    JOptionPane.showMessageDialog(null, "El producto ha sido agregado");
-                    limpiarVistaAgregar();
+                    //Agregamos los datos a la bd 
+                    if (modeloInventario.agregaProducto(marca, modelo, pantalla, camara, almacenamiento, ram, precio, stock)) {
+
+                        String[] opciones = {"Aceptar"};
+                        JOptionPane.showOptionDialog(null, "El producto ha sido agregado", "Inventario", 0, JOptionPane.INFORMATION_MESSAGE, null, opciones, "Aceptar");
+
+                        limpiarVistaAgregar();
+                    }
+
+                } else {
+                    String[] opciones = {"Aceptar"};
+                    JOptionPane.showOptionDialog(null, "Los datos no son validos o hay campos vacios, intentelo de nuevo", "Inventario", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+
                 }
-
-            } else {
-                JOptionPane.showMessageDialog(null, "Los datos no son validos o hay campos vacios, intentelo de nuevo");
             }
+            
         }
     }
 

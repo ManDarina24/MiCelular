@@ -283,7 +283,7 @@ public class AgregaProducto extends javax.swing.JFrame {
     private javax.swing.JTextField pantallaTxt;
     private javax.swing.JTextField precioTxt;
     private javax.swing.JTextField ramTxt;
-    private javax.swing.JSpinner stockTxt;
+    public javax.swing.JSpinner stockTxt;
     // End of variables declaration//GEN-END:variables
 
     public JTextField getAlmTxt() {

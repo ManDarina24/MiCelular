@@ -35,7 +35,7 @@ public abstract class Pago {
         return total;
     }
 
-    public static void generarRecibo(int folioVenta, List<Producto> productosCanasta, Cliente cliente, double monto, String metodoPago) throws FileNotFoundException, DocumentException {
+    public static void generarRecibo(int folioVenta, List<Producto> productosCanasta, Cliente cliente, double monto, String metodoPago, String numTarjeta) throws FileNotFoundException, DocumentException {
 
         com.itextpdf.text.Rectangle pageSize = new com.itextpdf.text.Rectangle(200, 400);
 
@@ -125,6 +125,16 @@ public abstract class Pago {
                 )
         );
         documento.add(datosCliente);
+        //Es pago con tarjeta
+        if (Venta.MetodoPago.tarjeta.name().equals(metodoPago)) {
+            Paragraph tarjeta = new Paragraph("Tarjeta: *************" + numTarjeta.substring(numTarjeta.length() - 3),
+                    FontFactory.getFont("arial",
+                            8,
+                            BaseColor.BLACK
+                    )
+            );
+            documento.add(tarjeta);
+        }
 
         //-------------------------------------------------------------------------
         documento.add(new Chunk(linea));

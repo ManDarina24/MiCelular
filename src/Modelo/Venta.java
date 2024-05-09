@@ -10,22 +10,22 @@ import java.util.List;
  * @author jocel
  */
 public class Venta {
-   
+    
     public Venta(){}
-      
+    
     public int registraCliente(Cliente cliente) {
     int id = 0;
-    String insertClienteSQL = "INSERT INTO Cliente (nombre, apellidoPaterno, apellidoMaterno, telefono, correo) VALUES (?, ?, ?, ?, ?)";
+    String insertClienteSQL = "INSERT INTO cliente (nombre, apellidoPaterno, apellidoMaterno, telefono, correo) VALUES (?, ?, ?, ?, ?)";
 
     try (Connection conn = ConexionDB.conectar();
          PreparedStatement pstmtCliente = conn.prepareStatement(insertClienteSQL, Statement.RETURN_GENERATED_KEYS)) {
 
         // Insertar datos del cliente
-        pstmtCliente.setString(1, cliente.nombre);
-        pstmtCliente.setString(2, cliente.apellidoPaterno);
-        pstmtCliente.setString(3, cliente.apellidoMaterno);
-        pstmtCliente.setLong(4, cliente.telefono);
-        pstmtCliente.setString(5, cliente.correo);
+        pstmtCliente.setString(1, cliente.getNombre());
+        pstmtCliente.setString(2, cliente.getApellidoPaterno());
+        pstmtCliente.setString(3, cliente.getApellidoMaterno());
+        pstmtCliente.setLong(4, cliente.getTelefono());
+        pstmtCliente.setString(5, cliente.getCorreo());
 
         if (pstmtCliente.executeUpdate() == 1) {
             // Obtener el ID del cliente insertado
@@ -92,6 +92,7 @@ public class Venta {
         }
         return 0; // Ocurrió un error al registrar la venta y/o sus detalles
     }
+    
 
     public enum MetodoPago {
         tarjeta,

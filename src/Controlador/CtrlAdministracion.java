@@ -22,6 +22,7 @@ public class CtrlAdministracion implements ActionListener{
         this.vistaMenu.btnInventario.addActionListener(this);
         this.vistaMenu.btnSalir.addActionListener(this);
         this.vistaMenu.btnVenta.addActionListener(this);
+        this.vistaMenu.btnReporte.addActionListener(this);
     }
     
     public void iniciar(){
@@ -51,10 +52,14 @@ public class CtrlAdministracion implements ActionListener{
                     vistaMenu.setTitle("Menu principal");
                     vistaMenu.setLocationRelativeTo(null);
                 } else {
-                    JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos.");
+                    String[] opciones = {"Aceptar"};
+                    JOptionPane.showOptionDialog(null, "Usuario o contraseña incorrectos.", "Login", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+            
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Datos faltantes, llena todos los campos");
+                String[] opciones = {"Aceptar"};
+                JOptionPane.showOptionDialog(null, "Datos faltantes, llena todos los campos", "Login", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+            
             }
             
         }
@@ -76,6 +81,12 @@ public class CtrlAdministracion implements ActionListener{
             vistaMenu.setVisible(false);
             CtrlVenta ctrlVenta = new CtrlVenta();
             ctrlVenta.iniciar();
+        }
+        
+        if (e.getSource() == vistaMenu.btnReporte) {
+            vistaMenu.setVisible(false);
+            CtrlReportes reportes = new CtrlReportes();
+            reportes.iniciar();
         }
     }  
 }

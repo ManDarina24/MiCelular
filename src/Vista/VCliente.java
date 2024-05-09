@@ -223,7 +223,7 @@ public class VCliente extends javax.swing.JFrame {
     private javax.swing.JTextField maternoTxt;
     private javax.swing.JTextField nombreTxt;
     private javax.swing.JTextField paternoTxt;
-    private javax.swing.JTextField telTxt;
+    public javax.swing.JTextField telTxt;
     // End of variables declaration//GEN-END:variables
 
     public JTextField getCorreoTxt() {

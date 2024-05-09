@@ -5,13 +5,17 @@ import Vista.*;
 import com.itextpdf.text.DocumentException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -101,12 +105,16 @@ public class CtrlVenta implements ActionListener, ListSelectionListener, Documen
                 //Es entero positivo
                 folio = Integer.parseInt(strfolio);
                 if (modeloInventario.buscaProducto(folio) == null) {
-                    JOptionPane.showMessageDialog(null, "Producto no encontrado");
+                    String[] opciones = {"Aceptar"};
+                    JOptionPane.showOptionDialog(null, "Producto no encontrado", "Inventario", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+
                     vistaVenta.getFolioTxt().setText("");
                     folio = 0;
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Ingresa datos validos");
+                String[] opciones = {"Aceptar"};
+                JOptionPane.showOptionDialog(null, "Ingresa datos validos", "Inventario", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
+
                 vistaVenta.getFolioTxt().setText("");
             }
             vistaVenta.tabla.setModel(listar(vistaVenta.tabla, folio));
@@ -242,6 +250,18 @@ public class CtrlVenta implements ActionListener, ListSelectionListener, Documen
             vistaCliente.setVisible(true);
             vistaCliente.setTitle("Registro cliente");
             vistaCliente.setLocationRelativeTo(null);
+            
+            vistaCliente.telTxt.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    char c = e.getKeyChar();
+                    JTextField textField = (JTextField) vistaCliente.telTxt;
+                    String text = textField.getText();
+                    if (!Character.isDigit(c) || text.length() >= 10) {
+                        e.consume();
+                    }
+                }
+            });
         }
         
         if (e.getSource() == vistaCliente.btnSiguiente) {
@@ -250,6 +270,7 @@ public class CtrlVenta implements ActionListener, ListSelectionListener, Documen
             String materno = vistaCliente.getMaternoTxt().getText();
             String tel = vistaCliente.getTelTxt().getText();
             String correo = vistaCliente.getCorreoTxt().getText();
+            
 
             boolean validar = validarRegistro(nombre, paterno, materno, tel, correo);
             if (validar) {
@@ -300,6 +321,32 @@ public class CtrlVenta implements ActionListener, ListSelectionListener, Documen
             vistaDetalles.setEnabled(false);
             double total = Pago.calcularTotal(productosCanasta);
             vistaTarjeta.lblTotal.setText(String.valueOf(total));
+            
+            vistaTarjeta.numeroTarjetatxt.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    char c = e.getKeyChar();
+                    JTextField textField = (JTextField) e.getSource();
+                    String text = textField.getText();
+                    if (!Character.isDigit(c) || text.length() >= 16) {
+                        e.consume();
+                    }
+                }
+            });
+            
+            vistaTarjeta.cvvTxt.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    char c = e.getKeyChar();
+                    JTextField textField = (JTextField) e.getSource();
+                    String text = textField.getText();
+                    if (!Character.isDigit(c) || text.length() >= 3) {
+                        e.consume();
+                    }
+                }
+            });
+            
+         
         }
         
         if (e.getSource() == vistaTarjeta.btnPagar) {
@@ -307,66 +354,58 @@ public class CtrlVenta implements ActionListener, ListSelectionListener, Documen
             int opc = JOptionPane.showOptionDialog(null, "¿Deseas continuar con el pago?", "Pago", 0, JOptionPane.QUESTION_MESSAGE, null, opciones, "Aceptar");
 
             if (opc == 0) {
-                vistaTarjeta.btnPagar.setEnabled(false);
+                if (validarDatosTarjeta()) {
+                    System.out.println("Datos validos");
+                    vistaTarjeta.proceso.setText("Validando datos con el banco...");
+                    // Tercera tarea: Cambiar el texto del proceso a "Validando datos con el banco"
+                    Timer timer3 = new Timer(5000, (event3) -> {
 
-                // Primera tarea: Cambiar el texto del proceso a "El usuario puede ingresar su tarjeta"
-                Timer timer1 = new Timer(2000, (event) -> {
-                    vistaTarjeta.proceso.setText("El usuario puede ingresar su tarjeta");
+                        PagoTarjeta tarjeta = new PagoTarjeta();
 
-                    // Segunda tarea: Cambiar el texto del proceso a "El usuario puede ingresar su pin"
-                    Timer timer2 = new Timer(2000, (event2) -> {
-                        vistaTarjeta.proceso.setText("El usuario puede ingresar su pin");
+                        if (tarjeta.validarPago()) {
 
-                        // Tercera tarea: Cambiar el texto del proceso a "Validando datos con el banco"
-                        Timer timer3 = new Timer(4000, (event3) -> {
-                            vistaTarjeta.proceso.setText("Validando datos con el banco");
-                            PagoTarjeta tarjeta = new PagoTarjeta();
-                            
-                            
-                            if (tarjeta.validarPago()) {
-                                try {
-                                    // Mostrar mensaje de éxito
-                                    String[] conf = {"Aceptar"};
-                                    JOptionPane.showOptionDialog(null, "El pago se ha realizado de manera exitosa", "Pago", 0, JOptionPane.INFORMATION_MESSAGE, null, conf, "Aceptar");
-                                    
-                                    double total = Pago.calcularTotal(productosCanasta);
-                                    //Registra la venta
-                                    int id = modeloVenta.registraCliente(modeloCliente);
-                                    
-                                    modeloCliente.setId(id);
-                                    int folioVenta = modeloVenta.registraVenta(id, productosCanasta, total, Venta.MetodoPago.tarjeta, "Administrador");
-                                    
-                                    //Disminuir Stock
-                                    for (int i = 0; i < productosCanasta.size(); i++) {
-                                        Producto producto = modeloInventario.buscaProducto(productosCanasta.get(i).getId());
-                                        int cantidadNueva = producto.getCantidad() - productosCanasta.get(i).getCantidad();
-                                        modeloInventario.modificaStockProducto(producto.getId(), cantidadNueva);
-                                    }
-                                    Pago.generarRecibo(folioVenta, productosCanasta, modeloCliente, 0, "tarjeta");
-                                    //Redirige
-                                    vistaDetalles.setVisible(false);
-                                    vistaTarjeta.setVisible(false);
-                                    admin.mostrarMenuPrincipal();
-                                } catch (FileNotFoundException ex) {
-                                    Logger.getLogger(CtrlVenta.class.getName()).log(Level.SEVERE, null, ex);
-                                } catch (DocumentException ex) {
-                                    Logger.getLogger(CtrlVenta.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                            } else {
-                                String[] conf = {"Aceptar"};
-                                JOptionPane.showOptionDialog(null, "Tarjeta no valida, intentelo de nuevo", "Pago", 0, JOptionPane.ERROR_MESSAGE, null, conf, "Aceptar");
+                            // Mostrar mensaje de éxito
+                            String[] conf = {"Aceptar"};
+                            JOptionPane.showOptionDialog(null, "El pago se ha realizado de manera exitosa", "Pago", 0, JOptionPane.INFORMATION_MESSAGE, null, conf, "Aceptar");
 
+                            double totalVenta = Pago.calcularTotal(productosCanasta);
+                            //Registra la venta
+                            int id = modeloVenta.registraCliente(modeloCliente);
+
+                            modeloCliente.setId(id);
+                            int folioVenta = modeloVenta.registraVenta(id, productosCanasta, totalVenta, Venta.MetodoPago.tarjeta, "Administrador");
+
+                            //Disminuir Stock
+                            for (int i = 0; i < productosCanasta.size(); i++) {
+                                Producto producto = modeloInventario.buscaProducto(productosCanasta.get(i).getId());
+                                int cantidadNueva = producto.getCantidad() - productosCanasta.get(i).getCantidad();
+                                modeloInventario.modificaStockProducto(producto.getId(), cantidadNueva);
                             }
+                            String numeroTarjeta = vistaTarjeta.numeroTarjetatxt.getText();
+                            try {
+                                //Por que marca erro?
+                                Pago.generarRecibo(folioVenta, productosCanasta, modeloCliente, 0, "tarjeta", numeroTarjeta);
+                            } catch (FileNotFoundException ex) {
+                                Logger.getLogger(CtrlVenta.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (DocumentException ex) {
+                                Logger.getLogger(CtrlVenta.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            //Redirige
+                            vistaDetalles.setVisible(false);
+                            vistaTarjeta.setVisible(false);
+                            admin.mostrarMenuPrincipal();
 
-                        });
-                        timer3.setRepeats(false); // Esta tarea se ejecuta una sola vez
-                        timer3.start(); // Comienza la tercera tarea
+                        } else {
+                            String[] conf = {"Aceptar"};
+                            JOptionPane.showOptionDialog(null, "Tarjeta no valida, intentelo de nuevo", "Pago", 0, JOptionPane.ERROR_MESSAGE, null, conf, "Aceptar");
+
+                        }
                     });
-                    timer2.setRepeats(false); // Esta tarea se ejecuta una sola vez
-                    timer2.start(); // Comienza la segunda tarea
-                });
-                timer1.setRepeats(false); // Esta tarea se ejecuta una sola vez
-                timer1.start(); // Comienza la primera tarea
+                    timer3.setRepeats(false); // Esta tarea se ejecuta una sola vez
+                    timer3.start(); // Comienza la tercera tarea
+
+                }
+
             }
         }
         
@@ -377,12 +416,12 @@ public class CtrlVenta implements ActionListener, ListSelectionListener, Documen
             if (opc == 0) {
 
                 try {
-                    double total = Pago.calcularTotal(productosCanasta);
+                    double totalVenta = Pago.calcularTotal(productosCanasta);
                     //Registra la venta
                     int id = modeloVenta.registraCliente(modeloCliente);
                     
                     modeloCliente.setId(id);
-                    int folioVenta = modeloVenta.registraVenta(id, productosCanasta, total, Venta.MetodoPago.efectivo, "Administrador");
+                    int folioVenta = modeloVenta.registraVenta(id, productosCanasta, totalVenta, Venta.MetodoPago.efectivo, "Administrador");
                     
                     //Disminuir Stock
                     for (int i = 0; i < productosCanasta.size(); i++) {
@@ -391,7 +430,7 @@ public class CtrlVenta implements ActionListener, ListSelectionListener, Documen
                         modeloInventario.modificaStockProducto(producto.getId(), cantidadNueva);
                     }
                     //Generar recibo
-                    Pago.generarRecibo(folioVenta, productosCanasta, modeloCliente, Double.parseDouble(vistaEfectivo.montoTxt.getText()), "efectivo");
+                    Pago.generarRecibo(folioVenta, productosCanasta, modeloCliente, Double.parseDouble(vistaEfectivo.montoTxt.getText()), "efectivo", "");
                     
                     String[] conf = {"Aceptar"};
                     JOptionPane.showOptionDialog(null, "El pago se ha realizado de manera exitosa", "Pago", 0, JOptionPane.INFORMATION_MESSAGE, null, conf, "Aceptar");
@@ -517,7 +556,7 @@ public class CtrlVenta implements ActionListener, ListSelectionListener, Documen
     public boolean validarRegistro(String nombre, String apellidoPaterno, String apellidoMaterno, String tel, String correo) {
 
         // Verificar que los nombres y apellidos contengan solo letras
-        if (!nombre.matches("[a-zA-Z]+") || !apellidoPaterno.matches("[a-zA-Z]+") || !apellidoMaterno.matches("[a-zA-Z]+")) {
+        if (!nombre.matches("[a-zA-ZñÑáéíóúÁÉÍÓÚ]+") || !apellidoPaterno.matches("[a-zA-ZñÑáéíóúÁÉÍÓÚ]+") || !apellidoMaterno.matches("[a-zA-ZñÑáéíóúÁÉÍÓÚ]+")) {
             System.out.println("1");
             return false;
         }
@@ -569,6 +608,41 @@ public class CtrlVenta implements ActionListener, ListSelectionListener, Documen
             JOptionPane.showOptionDialog(null, "Valor invalido", "Pago", 0, JOptionPane.ERROR_MESSAGE, null, opciones, "Aceptar");
             vistaEfectivo.btnPagar.setEnabled(false);
         }
+    }
+    
+    private boolean validarDatosTarjeta() {
+        String numeroTarjeta = vistaTarjeta.numeroTarjetatxt.getText();
+        String cvv = vistaTarjeta.cvvTxt.getText();
+        if (numeroTarjeta.length() != 16 || cvv.length() != 3) {
+            String[] opci = {"Aceptar"};
+            JOptionPane.showOptionDialog(null, "Ingresa todos los campos", "Pago", 0, JOptionPane.QUESTION_MESSAGE, null, opci, "Aceptar");
+            return false;
+        }
+        
+        String mesExpiracion = (String) vistaTarjeta.mesTxt.getSelectedItem();
+        String añoExpiracion = (String) vistaTarjeta.anioTxt.getSelectedItem();
+        int mesActual = LocalDate.now().getMonthValue();
+        int añoActual = LocalDate.now().getYear();
+        int mesSeleccionado = vistaTarjeta.mesTxt.getSelectedIndex();
+        int añoSeleccionado = Integer.parseInt(añoExpiracion);
+        
+        if (mesExpiracion == "Mes" || añoExpiracion == "Año") {
+            String[] opci = {"Aceptar"};
+            JOptionPane.showOptionDialog(null, "Selecciona un mes y un año", "Pago", 0, JOptionPane.ERROR_MESSAGE, null, opci, "Aceptar");
+            return false;
+        }
+        
+        if (añoSeleccionado == añoActual && mesSeleccionado <= mesActual ) {
+                System.out.println(añoSeleccionado);
+                System.out.println(mesSeleccionado);
+                System.out.println(añoActual);
+                System.out.println(mesActual);
+                String[] opci = {"Aceptar"};
+                JOptionPane.showOptionDialog(null, "La fecha de caducidad es invalida", "Pago", 0, JOptionPane.ERROR_MESSAGE, null, opci, "Aceptar");
+                return false;
+            }
+        return true;
+
     }
     
 }
